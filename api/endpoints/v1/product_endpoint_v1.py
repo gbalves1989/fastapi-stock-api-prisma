@@ -1,5 +1,7 @@
 from typing import List
+
 from fastapi import APIRouter, status, UploadFile, Depends, Request
+from fastapi.responses import FileResponse
 
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -14,9 +16,8 @@ from api.services.product_service import (
 )
 from api.dtos.requests.product.create_request_dto import ProductCreateRequestDTO
 from api.dtos.requests.product.update_request_dto import ProductUpdateRequestDTO
-from api.dtos.responses.product.product_response_dto import (
-    ProductResponseDTO
-)
+from api.dtos.responses.product.product_response_dto import ProductResponseDTO
+
 from api.dtos.responses.exception_response_dto import (
     ExceptionResponseDTO,
     ExceptionRateLimitResponseDTO
@@ -24,7 +25,7 @@ from api.dtos.responses.exception_response_dto import (
 from api.dtos.responses.user.user_response_dto import UserResponseDTO
 
 from core.authentication.deps import get_current_user
-from core.config import REQUEST_PER_MINUTES
+from core.config import REQUEST_PER_MINUTES, UPLOAD_DIR
 
 product_router_v1 = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
@@ -71,6 +72,34 @@ async def show(
     user_logged: UserResponseDTO = Depends(get_current_user)
 ) -> ProductResponseDTO:
     return await show_service(product_id)
+
+
+@product_router_v1.get(
+    "/file/{product_id}",
+    summary="Get banner file some product by id",
+    description="Return banner file some product by id",
+    status_code=status.HTTP_200_OK,
+    responses={
+        200: {
+            "content": {"image/png;image/jpg;image/jpeg": {}},
+            "description": "Return an banner file.",
+        },
+        401: {"model": ExceptionResponseDTO},
+        404: {"model": ExceptionResponseDTO},
+        429: {"model": ExceptionRateLimitResponseDTO}
+    }
+)
+@limiter.limit(str(REQUEST_PER_MINUTES) + "/minute")
+async def show_file(
+    request: Request,
+    product_id: str,
+    user_logged: UserResponseDTO = Depends(get_current_user)
+):
+    product: ProductResponseDTO = await show_service(product_id)
+    return FileResponse(
+        path=f"{UPLOAD_DIR}/products/{product.banner}",
+        filename=product.banner
+    )
 
 
 @product_router_v1.get(
