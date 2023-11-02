@@ -22,8 +22,8 @@ Api desenvolvida em python usando framework FastAPI
   - prisma db push
 
 - lembrar de colocar o ip da sua maquina em API_HOST
-
-<img width="381" alt="json" src="https://github.com/gbalves1989/fastapi-stock-api/assets/44848446/4a705a39-3830-4c5e-bb2d-4b73abdc96be">
+ 
+<img width="411" alt="env" src="https://github.com/gbalves1989/fastapi-stock-api/assets/44848446/3dbbb082-fa3f-4df5-a189-5907574d51ba">
 
 - executar a aplicação
   - python main.py
