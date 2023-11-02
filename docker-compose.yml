@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - ./docker/grafana/config.monitoring
+      

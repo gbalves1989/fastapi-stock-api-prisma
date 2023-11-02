@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String?  @default("")
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updateAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("users")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updateAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  Product Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  banner      String?  @default("")
+  categoryId  String
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updateAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("products")
+}
